@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.util import nest
+from copy import deepcopy
 
 from atflow.misc import batchify_shape
 
@@ -156,10 +157,7 @@ class Dataset:
         return nest.pack_sequence_as(self.targets_structure, self._targets_shape)
 
     def copy(self):
-        return Dataset(inputs=self.train_inputs.copy(), targets=self.train_targets.copy(),
-                       validation_inputs=self.validation_inputs, validation_targets=self.validation_targets,
-                       test_inputs=self.test_inputs, test_targets=self.test_targets)
-
+        return deepcopy(self)
 
     def update_stats(self, axis=None):
 
@@ -393,6 +391,9 @@ class MultiDataset:
         """
         return self.validation_inputs, self.validation_targets
 
+    def copy(self):
+        datasets_copy = [d.copy() for d in self._datasets]
+        return self.__class__(*datasets_copy)
 
     def minibatch(self, batch_size):
         if batch_size > self.n_train_samples:
